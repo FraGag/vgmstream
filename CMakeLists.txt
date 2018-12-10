@@ -65,6 +65,6 @@ add_subdirectory(src)
 # The targets they provide are plugins for media players that only exist as 32-bit Windows executables.
 if(WIN32 AND CMAKE_SIZEOF_VOID_P EQUAL 4)
   #add_subdirectory(fb2k)
-  #add_subdirectory(winamp)
+  add_subdirectory(winamp)
   #add_subdirectory(xmplay)
 endif()

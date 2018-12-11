@@ -58,13 +58,14 @@ target_include_directories(version INTERFACE "${CMAKE_CURRENT_BINARY_DIR}")
 
 #add_subdirectory(audacious)
 add_subdirectory(cli)
+add_subdirectory(dependencies-cmake)
 add_subdirectory(ext_libs)
 add_subdirectory(src)
 
 # Only add these subdirectories when targetting 32-bit Windows.
 # The targets they provide are plugins for media players that only exist as 32-bit Windows executables.
 if(WIN32 AND CMAKE_SIZEOF_VOID_P EQUAL 4)
-  #add_subdirectory(fb2k)
+  add_subdirectory(fb2k)
   add_subdirectory(winamp)
   #add_subdirectory(xmplay)
 endif()

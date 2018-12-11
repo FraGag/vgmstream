@@ -20,7 +20,11 @@ extern "C" {
 #include "foo_filetypes.h"
 
 #ifndef VERSION
+#ifdef CMAKE
+#include "version.h"
+#else
 #include "../version.h"
+#endif
 #endif
 
 #ifndef VERSION

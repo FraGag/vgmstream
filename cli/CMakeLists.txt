@@ -5,3 +5,9 @@ add_executable(vgmstream_cli
 )
 
 target_link_libraries(vgmstream_cli vgmstream getopt version)
+
+add_executable(vgmstream123
+  vgmstream123.c
+)
+
+target_link_libraries(vgmstream123 vgmstream getopt version ao)

@@ -23,10 +23,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
+#ifndef _MSC_VER
+# include <strings.h>
+#endif
 #include <getopt.h>
 #include <ao/ao.h>
-#include <sys/time.h>
+#include <time.h>
 #ifdef WIN32
 # include <io.h>
 # include <fcntl.h>
@@ -38,7 +40,11 @@
 #include "../src/vgmstream.h"
 
 #undef VERSION
+#ifdef CMAKE
+#include "version.h"
+#else
 #include "../version.h"
+#endif
 #ifndef VERSION
 # define VERSION "(unknown version)"
 #endif
@@ -46,6 +52,7 @@
 
 //TODO: improve WIN32 builds (some features/behaviors are missing but works)
 #ifdef WIN32
+typedef ptrdiff_t ssize_t;
 #define getline(line, line_mem, f)  0
 #define mkdtemp(temp_dir)  0
 #define signal(sig, interrupt_handler)  /*nothing*/
@@ -103,13 +110,13 @@ static void interrupt_handler(int signum) {
 
 static int record_interrupt(void) {
     int ret = 0;
-    struct timeval tv = { 0, 0 };
+    struct timespec ts = { 0, 0 };
     double t;
 
-    if (gettimeofday(&tv, NULL))
+    if (timespec_get(&ts, TIME_UTC))
         return -1;
 
-    t = (double)tv.tv_sec + (double)tv.tv_usec / 1.0e6;
+    t = (double)ts.tv_sec + (double)ts.tv_nsec / 1.0e9;
 
     if (t - interrupt_time < DOUBLE_INTERRUPT_TIME)
         ret = 1;
@@ -235,7 +242,9 @@ static int play_vgmstream(const char *filename, struct params *par) {
     int ret = 0;
     STREAMFILE *sf;
     VGMSTREAM *vgms;
+#ifndef WIN32
     FILE *save_fps[4];
+#endif
     int loop_count;
     int64_t total_samples;
     size_t buffer_size;
@@ -281,12 +290,14 @@ static int play_vgmstream(const char *filename, struct params *par) {
         putchar('\n');
     }
 
+#ifndef WIN32
     /* Stupid hack to hang onto a few low-numbered file descriptors
      * so that play_compressed_file() doesn't break, due to POSIX
      * wackiness like https://bugs.debian.org/590920
      */
     for (i = 0; i < 4; i++)
         save_fps[i] = fopen("/dev/null", "r");
+#endif
 
     ret = set_sample_format(vgms);
     if (ret) goto fail;
@@ -409,8 +420,10 @@ static int play_vgmstream(const char *filename, struct params *par) {
 
     close_vgmstream(vgms);
 
+#ifndef WIN32
     for (i = 0; i < 4; i++)
         fclose(save_fps[i]);
+#endif
 
     return ret;
 }

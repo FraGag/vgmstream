@@ -1,5 +1,6 @@
 #include <glib.h>
 #include <cstdlib>
+#include <utility>
 
 #include <libaudcore/plugin.h>
 
@@ -14,6 +15,12 @@ typedef struct _VFSSTREAMFILE {
   char name[32768];
   //char realname[32768];
 } VFSSTREAMFILE;
+
+template<typename Fn, Fn fn, typename... Args>
+typename std::result_of<Fn(VFSSTREAMFILE *, Args...)>::type wrapper(STREAMFILE *streamfile, Args... args) {
+  return fn(reinterpret_cast<VFSSTREAMFILE *>(streamfile), std::forward<Args>(args)...);
+}
+#define WRAP(FUNC) wrapper<decltype(&FUNC), &FUNC>
 
 static STREAMFILE *open_vfs_by_VFSFILE(VFSFile *file, const char *path);
 
@@ -43,7 +50,7 @@ static size_t get_size_vfs(VFSSTREAMFILE *streamfile) {
   return streamfile->vfsFile->fsize();
 }
 
-static size_t get_offset_vfs(VFSSTREAMFILE *streamfile) {
+static off_t get_offset_vfs(VFSSTREAMFILE *streamfile) {
   return streamfile->offset;
 }
 
@@ -70,12 +77,12 @@ STREAMFILE *open_vfs_by_VFSFILE(VFSFile *file, const char *path) {
   // success, set our pointers
   memset(streamfile, 0, sizeof(VFSSTREAMFILE));
 
-  streamfile->sf.read = read_vfs;
-  streamfile->sf.get_size = get_size_vfs;
-  streamfile->sf.get_offset = get_offset_vfs;
-  streamfile->sf.get_name = get_name_vfs;
-  streamfile->sf.open = open_vfs_impl;
-  streamfile->sf.close = close_vfs;
+  streamfile->sf.read = WRAP(read_vfs);
+  streamfile->sf.get_size = WRAP(get_size_vfs);
+  streamfile->sf.get_offset = WRAP(get_offset_vfs);
+  streamfile->sf.get_name = WRAP(get_name_vfs);
+  streamfile->sf.open = WRAP(open_vfs_impl);
+  streamfile->sf.close = WRAP(close_vfs);
 
   streamfile->vfsFile = file;
   streamfile->offset = 0;

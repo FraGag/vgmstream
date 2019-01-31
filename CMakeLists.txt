@@ -20,6 +20,8 @@ if(CMAKE_RC_COMPILER)
   enable_language(RC)
 endif(CMAKE_RC_COMPILER)
 
+find_package(PkgConfig)
+
 if(MSVC)
   add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 endif(MSVC)
@@ -56,7 +58,7 @@ add_dependencies(version version_h)
 target_compile_definitions(version INTERFACE CMAKE) # until we remove the prior build systems
 target_include_directories(version INTERFACE "${CMAKE_CURRENT_BINARY_DIR}")
 
-#add_subdirectory(audacious)
+add_subdirectory(audacious)
 add_subdirectory(cli)
 add_subdirectory(dependencies-cmake)
 add_subdirectory(ext_libs)

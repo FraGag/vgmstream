@@ -498,3 +498,8 @@ set(SOURCES
 add_library(vgmstream STATIC ${HEADERS} ${SOURCES})
 
 target_link_libraries(vgmstream clHCA m)
+
+# This is needed on Unix-based systems
+# so that linking this static library into a shared library (i.e. a plugin) works.
+set_target_properties(vgmstream
+  PROPERTIES POSITION_INDEPENDENT_CODE True)

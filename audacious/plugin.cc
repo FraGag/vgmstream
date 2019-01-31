@@ -22,7 +22,11 @@ extern "C" {
 
 
 #ifndef VERSION
+#ifdef CMAKE
+#include "version.h"
+#else
 #include "../version.h"
+#endif
 #endif
 #ifndef VERSION
 #define VERSION "(unknown version)"
